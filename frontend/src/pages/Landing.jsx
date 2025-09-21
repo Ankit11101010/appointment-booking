@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from 'react';
-
+import { useState, useEffect, useRef } from 'react';
 import { 
   FaSearch, 
   FaCalendarAlt, 
@@ -23,9 +22,36 @@ import {
   FaYoutube,
   FaChevronLeft,
   FaChevronRight,
-  FaStar
+  FaStar,
+  FaPlus,
+  FaMobileAlt,
+  FaDownload,
+  FaMinus,
+  FaArrowRight,
+  FaRegCalendarCheck,
+  FaClinicMedical,
+  FaAmbulance,
+  FaPrescriptionBottleAlt,
+  FaNotesMedical,
+  FaLaptopMedical,
+  FaUserFriends,
+  FaAward,
+  FaChartLine,
+  FaGlobe,
+  FaCog,
+  FaBell,
+  FaShieldVirus,
+  FaHandHoldingHeart,
+  FaSyringe,
+  FaXRay,
+  FaTeeth,
+  FaBrain,
+  FaAllergies,
+  FaHeart,
+  FaLungs,
+  FaBaby
 } from 'react-icons/fa';
-import { GiBrain } from 'react-icons/gi';
+import { GiBrain, GiHealthPotion } from 'react-icons/gi';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -34,6 +60,11 @@ export default function LandingPage() {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [activeFAQ, setActiveFAQ] = useState(null);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [stats, setStats] = useState({ patients: 0, doctors: 0, appointments: 0, cities: 0 });
+  const statsRef = useRef(null);
+  const [isStatsVisible, setIsStatsVisible] = useState(false);
 
   const doctorsData = [
     {
@@ -134,7 +165,101 @@ export default function LandingPage() {
     }
   ];
 
-  const specialties = ['All', 'General', 'Cardio', 'Neuro', 'Dental', 'Pediatric'];
+  // FAQ data
+  const faqData = [
+    {
+      question: "How do I prepare for my appointment?",
+      answer: "Please bring your ID proof, any previous medical records, and a list of current medications. Arrive 10-15 minutes early for registration."
+    },
+    {
+      question: "What information do I need to book an appointment?",
+      answer: "You'll need basic contact information, your reason for visit, and insurance details if applicable."
+    },
+    {
+      question: "What is your cancellation policy?",
+      answer: "You can cancel or reschedule up to 12 hours before your appointment without any charges. Late cancellations may incur a small fee."
+    },
+    {
+      question: "Do you accept insurance?",
+      answer: "We work with most major insurance providers. You can check your specific provider in the insurance section during booking."
+    },
+    {
+      question: "What in case of emergency?",
+      answer: "For medical emergencies, please go directly to the nearest emergency room or call 108. This platform is for non-emergency appointments."
+    }
+  ];
+
+  // Health tips data
+  const healthTips = [
+    {
+      title: "Managing Seasonal Allergies",
+      excerpt: "Learn how to reduce symptoms during pollen season",
+      category: "Seasonal Health"
+    },
+    {
+      title: "5 Signs You Should See a Cardiologist",
+      excerpt: "Early detection can save lives - know the warning signs",
+      category: "Preventive Care"
+    },
+    {
+      title: "Digital Eye Strain: Prevention Tips",
+      excerpt: "Protect your eyes in the digital age",
+      category: "Wellness"
+    }
+  ];
+
+  // Testimonials data
+  const testimonials = [
+    {
+      name: "Rajesh Kumar",
+      role: "Patient",
+      content: "DocBook+ saved me hours of waiting time. The AI recommendation matched me with the perfect specialist for my condition.",
+      avatar: "/avatar1.jpg",
+      rating: 5
+    },
+    {
+      name: "Priya Singh",
+      role: "Working Professional",
+      content: "As a busy professional, I can't afford to wait in clinics. This platform lets me book appointments during my commute.",
+      avatar: "/avatar2.jpg",
+      rating: 5
+    },
+    {
+      name: "Dr. Amit Sharma",
+      role: "Cardiologist",
+      content: "The platform has streamlined my practice significantly. I can focus more on patients rather than administrative tasks.",
+      avatar: "/avatar3.jpg",
+      rating: 5
+    }
+  ];
+
+  // Services data
+  const services = [
+    { icon: <FaRegCalendarCheck />, title: "Online Appointment", description: "Book doctor appointments 24/7 without waiting" },
+    { icon: <FaClinicMedical />, title: "Clinic Visit", description: "Visit your preferred clinic with confirmed timing" },
+    { icon: <FaLaptopMedical />, title: "Video Consultation", description: "Consult doctors remotely from your home" },
+    { icon: <FaAmbulance />, title: "Emergency Care", description: "Quick access to emergency medical services" },
+    { icon: <FaPrescriptionBottleAlt />, title: "E-Prescriptions", description: "Digital prescriptions sent directly to your phone" },
+    { icon: <FaNotesMedical />, title: "Health Records", description: "Access your medical history anytime, anywhere" }
+  ];
+
+  // Specialties data with icons
+  const specialties = [
+    { name: 'All', icon: <FaUserMd /> },
+    { name: 'General', icon: <FaStethoscope /> },
+    { name: 'Cardio', icon: <FaHeart /> },
+    { name: 'Neuro', icon: <FaBrain /> },
+    { name: 'Dental', icon: <FaTeeth /> },
+    { name: 'Pediatric', icon: <FaBaby /> },
+    { name: 'Ortho', icon: <FaXRay /> },
+    { name: 'Dermatology', icon: <FaAllergies /> },
+    { name: 'Pulmonology', icon: <FaLungs /> }
+  ];
+
+  // Toggle FAQ expansion
+  const toggleFAQ = (index) => {
+    setActiveFAQ(activeFAQ === index ? null : index);
+  };
 
   // Filter doctors based on active filter
   useEffect(() => {
@@ -180,6 +305,73 @@ export default function LandingPage() {
     };
   }, []);
 
+  // Testimonial navigation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+
+  // Stats counter animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsStatsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isStatsVisible) {
+      const duration = 2000; // ms
+      const steps = 60;
+      const stepDuration = duration / steps;
+
+      const counters = {
+        patients: { target: 10000, current: 0 },
+        doctors: { target: 500, current: 0 },
+        appointments: { target: 25000, current: 0 },
+        cities: { target: 50, current: 0 }
+      };
+
+      const interval = setInterval(() => {
+        let allCompleted = true;
+
+        Object.keys(counters).forEach(key => {
+          if (counters[key].current < counters[key].target) {
+            const step = Math.ceil(counters[key].target / steps);
+            counters[key].current = Math.min(counters[key].current + step, counters[key].target);
+            allCompleted = false;
+          }
+        });
+
+        setStats({
+          patients: counters.patients.current,
+          doctors: counters.doctors.current,
+          appointments: counters.appointments.current,
+          cities: counters.cities.current
+        });
+
+        if (allCompleted) {
+          clearInterval(interval);
+        }
+      }, stepDuration);
+
+      return () => clearInterval(interval);
+    }
+  }, [isStatsVisible]);
+
   return (
     <div className="font-sans bg-black text-gray-100">
       
@@ -198,7 +390,7 @@ export default function LandingPage() {
               For Your City
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 max-w-xl mx-auto md:mx-0">
-              Choose the Right Doctor & Book Instantly — Designed for Residents Across India .
+              Choose the Right Doctor & Book Instantly — Designed for Residents Across India.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
               <button
@@ -230,13 +422,71 @@ export default function LandingPage() {
               <img 
                 src="src/assets/booking.png" 
                 alt="App interface showing doctor booking"
-                className="w-full h-auto "
+                className="w-full h-auto rounded-2xl shadow-2xl"
               />
             </div>
           </div>
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section ref={statsRef} className="py-16 bg-gradient-to-tr from-black to-gray-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { icon: <FaUserFriends className="text-3xl text-teal-400" />, value: stats.patients, label: "Happy Patients", suffix: "+" },
+              { icon: <FaUserMd className="text-3xl text-blue-400" />, value: stats.doctors, label: "Expert Doctors", suffix: "+" },
+              { icon: <FaRegCalendarCheck className="text-3xl text-purple-400" />, value: stats.appointments, label: "Appointments", suffix: "+" },
+              { icon: <FaGlobe className="text-3xl text-amber-400" />, value: stats.cities, label: "Cities", suffix: "+" }
+            ].map((stat, index) => (
+              <div key={index} className="text-center p-6 bg-gray-800/30 rounded-2xl backdrop-blur-sm border border-gray-700 hover:border-teal-400/30 transition-all duration-500">
+                <div className="flex justify-center mb-4">
+                  {stat.icon}
+                </div>
+                <div className="text-4xl font-bold text-white mb-2">
+                  {stat.value}{stat.suffix}
+                </div>
+                <div className="text-gray-400">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-20 px-6 bg-black">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+              Our Healthcare Services
+            </h2>
+            <p className="text-gray-400">
+              Comprehensive medical services designed to meet all your healthcare needs with convenience and quality care.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, index) => (
+              <div 
+                key={index} 
+                className="group p-8 rounded-2xl bg-gray-800/30 backdrop-blur-sm border border-gray-700 hover:border-teal-400/50 transition-all duration-500 hover:scale-105 hover:shadow-xl"
+              >
+                <div className="text-teal-400 text-3xl mb-6 group-hover:text-white transition-colors duration-300">
+                  {service.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">{service.title}</h3>
+                <p className="text-gray-400 mb-6">{service.description}</p>
+                <button className="text-teal-400 flex items-center font-medium group-hover:text-teal-300 transition-colors duration-300">
+                  Learn more
+                  <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
       <section id="how-it-works" className="py-24 px-6 bg-black">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-4xl mx-auto mb-20">
@@ -324,178 +574,287 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Featured Doctors - Enhanced UI */}
-      <section id="doctors" className="py-20 px-4 sm:px-6 bg-gradient-to-b from-black-900 to-black relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-teal-500 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse"></div>
+     {/* Featured Doctors - Enhanced UI */}
+<section id="doctors" className="py-20 px-4 sm:px-6 bg-gradient-to-b from-black-900 to-black relative overflow-hidden">
+  {/* Animated background elements */}
+  <div className="absolute inset-0 opacity-10">
+    <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-teal-500 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse"></div>
+    <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-soft-light filter blur-3xl animate-pulse"></div>
+  </div>
+  
+  <div className="max-w-7xl mx-auto relative z-10">
+    {/* Header - Centered at the top */}
+    <div className="text-center mb-12">
+      <h2 className="text-3xl sm:text-5xl font-bold mb-3 bg-gradient-to-r from-teal-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+        Meet Our Healthcare Partners
+      </h2>
+      <p className="text-gray-400 max-w-2xl mx-auto">Our team of specialized professionals is dedicated to providing you with the best healthcare experience.</p>
+    </div>
+
+    {/* Filters - Enhanced with scrollable container */}
+    <div className="flex justify-center mb-12">
+      <div className="w-full max-w-4xl relative">
+        <div className="relative flex items-center">
+          {/* Left scroll button (visible on mobile) */}
+          {showLeftArrow && (
+            <button 
+              onClick={() => handleScroll('left')}
+              className="absolute left-0 z-10 bg-gray-800 rounded-full p-2 shadow-lg hidden sm:block"
+              aria-label="Scroll left"
+            >
+              <FaChevronLeft className="text-teal-400" />
+            </button>
+          )}
+          
+          {/* Filters container */}
+          <div 
+            id="filter-container"
+            className="flex overflow-x-auto scrollbar-hide space-x-2 py-2 px-1 rounded-xl bg-gray-800/50 backdrop-blur-sm border border-gray-700 max-w-full mx-auto"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {specialties.map((spec, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveFilter(spec.name)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap flex-shrink-0 flex items-center ${
+                  activeFilter === spec.name
+                    ? 'bg-gradient-to-r from-teal-600 to-blue-600 text-white shadow-lg transform scale-105'
+                    : 'bg-gray-700/30 hover:bg-gray-700/70 text-gray-300 hover:text-white'
+                }`}
+              >
+                <span className="mr-2">{spec.icon}</span>
+                {spec.name}
+              </button>
+            ))}
+          </div>
+          
+          {/* Right scroll button (visible on mobile) */}
+          {showRightArrow && (
+            <button 
+              onClick={() => handleScroll('right')}
+              className="absolute right-0 z-10 bg-gray-800 rounded-full p-2 shadow-lg hidden sm:block"
+              aria-label="Scroll right"
+            >
+              <FaChevronRight className="text-teal-400" />
+            </button>
+          )}
         </div>
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Header + Filters - Enhanced */}
-          <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12">
-            <div className="text-center md:text-left">
-              <h2 className="text-3xl sm:text-5xl font-bold mb-3 bg-gradient-to-r from-teal-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                Meet Our Healthcare Partners
-              </h2>
-              <p className="text-gray-400 max-w-xl">Our team of specialized professionals is dedicated to providing you with the best healthcare experience.</p>
-            </div>
-            
-            {/* Filters - Enhanced with scrollable container */}
-            <div className="w-full md:w-auto relative">
-              <div className="relative flex items-center">
-                {/* Left scroll button (visible on mobile) */}
-                {showLeftArrow && (
-                  <button 
-                    onClick={() => handleScroll('left')}
-                    className="absolute left-0 z-10 bg-gray-800 rounded-full p-2 shadow-lg hidden sm:block"
-                    aria-label="Scroll left"
-                  >
-                    <FaChevronLeft className="text-teal-400" />
-                  </button>
-                )}
-                
-                {/* Filters container */}
-                <div 
-                  id="filter-container"
-                  className="flex overflow-x-auto scrollbar-hide space-x-2 py-2 px-1 rounded-xl bg-gray-800/50 backdrop-blur-sm border border-gray-700 max-w-full"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  {specialties.map((spec, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveFilter(spec)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
-                        activeFilter === spec
-                          ? 'bg-gradient-to-r from-teal-600 to-blue-600 text-white shadow-lg transform scale-105'
-                          : 'bg-gray-700/30 hover:bg-gray-700/70 text-gray-300 hover:text-white'
-                      }`}
-                    >
-                      {spec}
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Right scroll button (visible on mobile) */}
-                {showRightArrow && (
-                  <button 
-                    onClick={() => handleScroll('right')}
-                    className="absolute right-0 z-10 bg-gray-800 rounded-full p-2 shadow-lg hidden sm:block"
-                    aria-label="Scroll right"
-                  >
-                    <FaChevronRight className="text-teal-400" />
-                  </button>
-                )}
-              </div>
+      </div>
+    </div>
+
+    {/* Doctors Grid - Enhanced with animations */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {filteredDoctors.map((doctor, index) => (
+        <div
+          key={index}
+          className="group rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl bg-gray-800 hover:bg-gray-700/60 border border-gray-700 hover:border-teal-400/50 flex flex-col transform hover:-translate-y-2"
+        >
+          {/* Image - Enhanced */}
+          <div className="relative h-48 sm:h-52 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 to-gray-900/20 z-10"></div>
+            <div className="w-full h-full bg-gradient-to-r from-gray-700 to-gray-900 animate-pulse"></div>
+            <img
+              src={doctor.image}
+              alt={doctor.name}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 absolute inset-0"
+            />
+            <div className={`absolute top-3 right-3 bg-gradient-to-r ${doctor.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg transform group-hover:scale-105 transition-transform duration-300`}>
+              {doctor.badge}
             </div>
           </div>
 
-          {/* Doctors Grid - Enhanced with animations */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredDoctors.map((doctor, index) => (
-              <div
-                key={index}
-                className="group rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl bg-gray-800 hover:bg-gray-700/60 border border-gray-700 hover:border-teal-400/50 flex flex-col transform hover:-translate-y-2"
-              >
-                {/* Image - Enhanced */}
-                <div className="relative h-48 sm:h-52 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 to-gray-900/20 z-10"></div>
-                  <div className="w-full h-full bg-gradient-to-r from-gray-700 to-gray-900 animate-pulse"></div>
-                  <img
-                    src={doctor.image}
-                    alt={doctor.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 absolute inset-0"
-                  />
-                  <div className={`absolute top-3 right-3 bg-gradient-to-r ${doctor.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg transform group-hover:scale-105 transition-transform duration-300`}>
-                    {doctor.badge}
-                  </div>
-                </div>
+          {/* Info - Enhanced */}
+          <div className="p-5 flex flex-col flex-grow">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-teal-300 transition-colors duration-300">{doctor.name}</h3>
+                <p className="text-teal-400 font-medium">{doctor.specialty}</p>
+              </div>
+              <div className="flex items-center bg-gray-700/80 px-2.5 py-1 rounded-full text-sm font-semibold backdrop-blur-sm group-hover:bg-teal-900/30 transition-colors duration-300">
+                <FaStar className="text-yellow-400 mr-1" /> {doctor.rating}
+                <span className="text-gray-400 ml-1 text-xs">({Math.floor(Math.random() * 100) + 50})</span>
+              </div>
+            </div>
 
-                {/* Info - Enhanced */}
-                <div className="p-5 flex flex-col flex-grow">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-teal-300 transition-colors duration-300">{doctor.name}</h3>
-                      <p className="text-teal-400 font-medium">{doctor.specialty}</p>
-                    </div>
-                    <div className="flex items-center bg-gray-700/80 px-2.5 py-1 rounded-full text-sm font-semibold backdrop-blur-sm group-hover:bg-teal-900/30 transition-colors duration-300">
-                      <FaStar className="text-yellow-400 mr-1" /> {doctor.rating}
-                      <span className="text-gray-400 ml-1 text-xs">({Math.floor(Math.random() * 100) + 50})</span>
-                    </div>
-                  </div>
+            <div className="text-sm text-gray-300 mb-4 space-y-2">
+              <p className="flex items-center">
+                <FaMapMarkerAlt className="mr-2 text-teal-400 flex-shrink-0" /> 
+                <span className="truncate">{doctor.clinic}</span>
+              </p>
+              <p className="flex items-center">
+                <FaClock className="mr-2 text-teal-400 flex-shrink-0" /> 
+                <span>Available {doctor.available}</span>
+              </p>
+              <p className="flex items-center">
+                <FaUserMd className="mr-2 text-teal-400 flex-shrink-0" /> 
+                <span>{doctor.experience} experience</span>
+              </p>
+            </div>
 
-                  <div className="text-sm text-gray-300 mb-4 space-y-2">
-                    <p className="flex items-center">
-                      <FaMapMarkerAlt className="mr-2 text-teal-400 flex-shrink-0" /> 
-                      <span className="truncate">{doctor.clinic}</span>
-                    </p>
-                    <p className="flex items-center">
-                      <FaClock className="mr-2 text-teal-400 flex-shrink-0" /> 
-                      <span>Available {doctor.available}</span>
-                    </p>
-                    <p className="flex items-center">
-                      <FaUserMd className="mr-2 text-teal-400 flex-shrink-0" /> 
-                      <span>{doctor.experience} experience</span>
-                    </p>
-                  </div>
+            <button className="mt-auto w-full py-3 rounded-lg font-bold transition-all duration-300 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 text-white flex items-center justify-center group-hover:shadow-lg transform group-hover:-translate-y-1">
+              <FaCalendarAlt className="mr-2" /> Book Consultation
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
 
-                  <button className="mt-auto w-full py-3 rounded-lg font-bold transition-all duration-300 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 text-white flex items-center justify-center group-hover:shadow-lg transform group-hover:-translate-y-1">
-                    <FaCalendarAlt className="mr-2" /> Book Consultation
+    {/* No results message */}
+    {filteredDoctors.length === 0 && (
+      <div className="text-center py-12">
+        <div className="text-teal-400 text-5xl mb-4">😔</div>
+        <h3 className="text-xl font-semibold text-gray-300 mb-2">No doctors found</h3>
+        <p className="text-gray-500">Try selecting a different specialty</p>
+      </div>
+    )}
+
+    {/* View All Button - Enhanced */}
+    <div className="text-center mt-14">
+      <button className="relative overflow-hidden group border-2 border-teal-400/30 text-teal-400 hover:text-white hover:border-teal-400 px-8 py-3.5 rounded-xl font-medium transition-all duration-500">
+        <span className="relative z-10 flex items-center justify-center">
+          View All 47 Doctors
+          <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </span>
+        <span className="absolute inset-0 bg-gradient-to-r from-teal-400/10 to-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+      </button>
+    </div>
+  </div>
+</section>
+     
+      {/* FAQ Section */}
+      <section className="py-20 px-6 bg-black">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-gray-400 text-center mb-12">Find answers to common questions about our services</p>
+          
+          <div className="space-y-4">
+            {faqData.map((faq, index) => (
+              <div key={index} className="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden transition-all duration-300 hover:border-teal-400/30">
+                <button
+                  className="flex justify-between items-center w-full p-6 text-left"
+                  onClick={() => toggleFAQ(index)}
+                >
+                  <span className="font-medium text-white">{faq.question}</span>
+                  {activeFAQ === index ? (
+                    <FaMinus className="text-teal-400" />
+                  ) : (
+                    <FaPlus className="text-teal-400" />
+                  )}
+                </button>
+                
+                {activeFAQ === index && (
+                  <div className="px-6 pb-6">
+                    <p className="text-gray-300">{faq.answer}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Health Tips Section */}
+      <section className="py-20 px-6 bg-gradient-to-b from-black to-gray-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+              Health & Wellness Tips
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              Expert advice to help you maintain your health and prevent illness
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {healthTips.map((tip, index) => (
+              <div key={index} className="bg-gray-800/50 rounded-2xl overflow-hidden border border-gray-700 transition-all hover:border-teal-400/50 hover:translate-y-2">
+                <div className="h-48 bg-gradient-to-br from-teal-900/20 to-blue-900/20"></div>
+                <div className="p-6">
+                  <span className="inline-block px-3 py-1 bg-teal-900/30 text-teal-400 rounded-full text-xs font-medium mb-4">
+                    {tip.category}
+                  </span>
+                  <h3 className="text-xl font-semibold text-white mb-3">{tip.title}</h3>
+                  <p className="text-gray-400 mb-4">{tip.excerpt}</p>
+                  <button className="text-teal-400 font-medium flex items-center hover:text-teal-300">
+                    Read More
+                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
                   </button>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* No results message */}
-          {filteredDoctors.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-teal-400 text-5xl mb-4">😔</div>
-              <h3 className="text-xl font-semibold text-gray-300 mb-2">No doctors found</h3>
-              <p className="text-gray-500">Try selecting a different specialty</p>
-            </div>
-          )}
-
-          {/* View All Button - Enhanced */}
-          <div className="text-center mt-14">
-            <button className="relative overflow-hidden group border-2 border-teal-400/30 text-teal-400 hover:text-white hover:border-teal-400 px-8 py-3.5 rounded-xl font-medium transition-all duration-500">
-              <span className="relative z-10 flex items-center justify-center">
-                View All 47 Doctors
-                <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-              </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-teal-400/10 to-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+          
+          <div className="text-center mt-12">
+            <button className="border-2 border-teal-400 text-teal-400 hover:bg-teal-400/10 px-8 py-3 rounded-xl font-medium transition-all">
+              View All Health Articles
             </button>
           </div>
         </div>
-
-        {/* Custom CSS for scrollbar hiding and animations */}
-        <style>{`
-          .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-          .animate-gradient {
-            background-size: 200% 200%;
-            animation: gradient 3s ease infinite;
-          }
-          @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-        `}</style>
       </section>
 
-      {/* Health Categories - Enhanced UI */}
+      {/* App Features Section */}
+      <section className="py-20 px-6 bg-black">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+                Our Mobile App
+              </h2>
+              <p className="text-gray-300 mb-8 text-lg">
+                Access healthcare on the go with our feature-packed mobile application
+              </p>
+              
+              <div className="space-y-6">
+                {[
+                  { icon: <FaMobileAlt className="text-teal-400 text-xl" />, title: "Telemedicine", desc: "Video consultations with doctors from anywhere" },
+                  { icon: <FaHeartbeat className="text-teal-400 text-xl" />, title: "Health Tracking", desc: "Monitor your health metrics over time" },
+                  { icon: <FaClock className="text-teal-400 text-xl" />, title: "Medication Reminders", desc: "Never miss a dose with smart alerts" },
+                  { icon: <FaDownload className="text-teal-400 text-xl" />, title: "Health Records", desc: "Access your medical history anytime" }
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className="bg-teal-900/30 p-3 rounded-lg mt-1">
+                      {feature.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-white mb-1">{feature.title}</h4>
+                      <p className="text-gray-400">{feature.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex gap-4 mt-8">
+                <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                  <FaDownload className="mr-2" /> App Store
+                </button>
+                <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                  <FaDownload className="mr-2" /> Play Store
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-1 flex justify-center">
+              <div className="relative">
+                <div className="w-72 h-96 bg-gradient-to-b from-teal-900/20 to-blue-900/20 rounded-3xl border-2 border-teal-400/30 shadow-2xl flex items-center justify-center">
+                  <div className="text-teal-400 text-6xl">
+                    <GiHealthPotion />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
       <section className="pt-32 pb-24 px-4 sm:px-6 bg-black relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative">
-
           {/* Background Glow Effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/5 to-pink-500/10 blur-3xl opacity-30 pointer-events-none z-0"></div>
 
@@ -563,7 +922,7 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA - Enhanced */}
-      <section className="py-28 px-6 bg-gradient-to-br from-black via-gray-900 to-teal-900 relative text-white">
+      <section className="py-28 px-6 bg-gradient-to-b from-black via-gray-900 to-teal-900 relative text-white">
         <div className="absolute inset-0 bg-gradient-to-tr from-black/80 via-transparent to-black/70"></div>
         
         <div className="relative max-w-4xl mx-auto text-center">
@@ -584,7 +943,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Futuristic Footer 2027 */}
+      {/* Footer */}
       <footer className="py-12 px-6 bg-gradient-to-br from-black via-gray-900 to-black relative text-gray-400">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 items-start text-center md:text-left">
           
