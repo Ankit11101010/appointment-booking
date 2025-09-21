@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import {
   FaUser,
   FaLock,
@@ -14,14 +15,58 @@ import {
   FaHospital,
 } from "react-icons/fa";
 
-const DoctorAuthForm = () => {
-  const [isSignUpMode, setIsSignUpMode] = useState(false);
+const DoctorAuth = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    specialization: "",
+  });
+  const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const toggleMode = () => setIsSignUpMode(!isSignUpMode);
-  const handleSignIn = (e) => e.preventDefault();
-  const handleSignUp = (e) => e.preventDefault();
+  const API_URL = "http://localhost:5000/api/auth"; // adjust if deployed
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    
+    // Validate passwords match for signup
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      setMessage("Passwords do not match");
+      return;
+    }
+
+    try {
+      if (isLogin) {
+        const { data } = await axios.post(`${API_URL}/login`, {
+          email: formData.email,
+          password: formData.password,
+        });
+        localStorage.setItem("doctorToken", data.token);
+        setMessage("Login successful ✅");
+      } else {
+        const { data } = await axios.post(`${API_URL}/register`, {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: "doctor",
+          specialization: formData.specialization,
+        });
+        localStorage.setItem("doctorToken", data.token);
+        setMessage("Signup successful ✅");
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Error occurred");
+    }
+  };
 
   const specializations = [
     { value: "cardiologist", label: "Cardiologist" },
@@ -52,33 +97,47 @@ const DoctorAuthForm = () => {
                 {/* Header */}
                 <div className="text-center space-y-2">
                   <div className="flex items-center justify-center space-x-3 mb-4">
-                    {!isSignUpMode ? (
+                    {isLogin ? (
                       <FaStethoscope className="text-blue-400 text-3xl" />
                     ) : (
                       <FaClinicMedical className="text-blue-400 text-3xl" />
                     )}
                     <h1 className="text-2xl lg:text-3xl font-bold text-white">
-                      {!isSignUpMode ? "Doctor Sign In" : "Doctor Registration"}
+                      {isLogin ? "Doctor Sign In" : "Doctor Registration"}
                     </h1>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    {!isSignUpMode
+                    {isLogin
                       ? "Access your medical dashboard"
                       : "Join our healthcare network"}
                   </p>
                 </div>
 
-                {/* Sign In Form */}
-                {!isSignUpMode && (
-                  <form onSubmit={handleSignIn} className="space-y-6">
+                {message && (
+                  <div className={`p-3 rounded-lg text-center text-sm ${
+                    message.includes("✅") 
+                      ? "bg-green-900/30 text-green-300" 
+                      : "bg-red-900/30 text-red-300"
+                  }`}>
+                    {message}
+                  </div>
+                )}
+
+                {/* Login Form */}
+                {isLogin && (
+                  <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                           <FaUser />
                         </div>
                         <input
-                          type="text"
-                          placeholder="Doctor ID / Email"
+                          type="email"
+                          name="email"
+                          placeholder="Email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
                           className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-200"
                         />
                       </div>
@@ -89,7 +148,11 @@ const DoctorAuthForm = () => {
                         </div>
                         <input
                           type={showPassword ? "text" : "password"}
+                          name="password"
                           placeholder="Password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          required
                           className="w-full pl-10 pr-10 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-200"
                         />
                         <button
@@ -130,7 +193,7 @@ const DoctorAuthForm = () => {
                         New to our platform?{" "}
                         <button
                           type="button"
-                          onClick={toggleMode}
+                          onClick={() => setIsLogin(false)}
                           className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
                         >
                           Create Account
@@ -141,8 +204,8 @@ const DoctorAuthForm = () => {
                 )}
 
                 {/* Sign Up Form */}
-                {isSignUpMode && (
-                  <form onSubmit={handleSignUp} className="space-y-6">
+                {!isLogin && (
+                  <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
@@ -150,7 +213,11 @@ const DoctorAuthForm = () => {
                         </div>
                         <input
                           type="text"
+                          name="name"
                           placeholder="Full Name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
                           className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-200"
                         />
                       </div>
@@ -161,13 +228,23 @@ const DoctorAuthForm = () => {
                         </div>
                         <input
                           type="email"
+                          name="email"
                           placeholder="Professional Email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
                           className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-200"
                         />
                       </div>
 
                       <div className="relative">
-                        <select className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white appearance-none">
+                        <select 
+                          name="specialization"
+                          value={formData.specialization}
+                          onChange={handleChange}
+                          required
+                          className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white appearance-none"
+                        >
                           <option value="">Select Specialization</option>
                           {specializations.map((spec) => (
                             <option key={spec.value} value={spec.value}>
@@ -198,7 +275,11 @@ const DoctorAuthForm = () => {
                         </div>
                         <input
                           type={showPassword ? "text" : "password"}
+                          name="password"
                           placeholder="Create Password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          required
                           className="w-full pl-10 pr-10 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-200"
                         />
                         <button
@@ -216,15 +297,17 @@ const DoctorAuthForm = () => {
                         </div>
                         <input
                           type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
                           placeholder="Confirm Password"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          required
                           className="w-full pl-10 pr-10 py-3 bg-gray-700/50 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-all duration-200"
                         />
                         <button
                           type="button"
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-300"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
                           {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
@@ -235,6 +318,7 @@ const DoctorAuthForm = () => {
                       <input
                         id="terms"
                         type="checkbox"
+                        required
                         className="mt-1 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
                       />
                       <label
@@ -270,7 +354,7 @@ const DoctorAuthForm = () => {
                         Already have an account?{" "}
                         <button
                           type="button"
-                          onClick={toggleMode}
+                          onClick={() => setIsLogin(true)}
                           className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
                         >
                           Sign In
@@ -283,93 +367,92 @@ const DoctorAuthForm = () => {
             </div>
 
             {/* Welcome Section */}
-<div className="hidden lg:flex relative bg-gradient-to-br from-blue-900/70 via-cyan-900/50 to-gray-900 p-12 h-full min-h-[calc(100vh-100px)]">
-  <div className="relative z-10 flex flex-col justify-center text-white space-y-6 w-full">
-    {!isSignUpMode ? (
-      <>
-        <div className="space-y-4">
-          <h2 className="text-4xl font-bold leading-tight">
-            Welcome Back,
-            <br />
-            <span className="text-blue-300">Doctor</span> 👨‍⚕️
-          </h2>
-          <p className="text-gray-200 leading-relaxed text-lg">
-            Access your AI-powered medical workspace. Manage patients,
-            collaborate with colleagues, and stay at the forefront of
-            healthcare innovation.
-          </p>
-        </div>
+            <div className="hidden lg:flex relative bg-gradient-to-br from-blue-900/70 via-cyan-900/50 to-gray-900 p-12 h-full min-h-[calc(100vh-100px)]">
+              <div className="relative z-10 flex flex-col justify-center text-white space-y-6 w-full">
+                {isLogin ? (
+                  <>
+                    <div className="space-y-4">
+                      <h2 className="text-4xl font-bold leading-tight">
+                        Welcome Back,
+                        <br />
+                        <span className="text-blue-300">Doctor</span> 👨‍⚕️
+                      </h2>
+                      <p className="text-gray-200 leading-relaxed text-lg">
+                        Access your AI-powered medical workspace. Manage patients,
+                        collaborate with colleagues, and stay at the forefront of
+                        healthcare innovation.
+                      </p>
+                    </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <FaHeartbeat className="text-blue-400 text-xl" />
-            <span>Real-time patient monitoring</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <FaBrain className="text-blue-400 text-xl" />
-            <span>AI-powered diagnostics</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <FaShieldAlt className="text-blue-400 text-xl" />
-            <span>Secure patient data</span>
-          </div>
-        </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <FaHeartbeat className="text-blue-400 text-xl" />
+                        <span>Real-time patient monitoring</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <FaBrain className="text-blue-400 text-xl" />
+                        <span>AI-powered diagnostics</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <FaShieldAlt className="text-blue-400 text-xl" />
+                        <span>Secure patient data</span>
+                      </div>
+                    </div>
 
-        <button
-          onClick={toggleMode}
-          className="w-fit mt-6 px-6 py-2 border-2 border-white rounded-xl text-white hover:bg-white hover:text-gray-900 transition-all duration-200"
-        >
-          New Here? Register
-        </button>
-      </>
-    ) : (
-      <>
-        <div className="space-y-4">
-          <h2 className="text-4xl font-bold leading-tight">
-            Join Our
-            <br />
-            <span className="text-blue-300">Medical Network</span> 🌐
-          </h2>
-          <p className="text-gray-200 leading-relaxed text-lg">
-            Be part of the future of healthcare. Connect with a global
-            network of medical professionals and access cutting-edge tools.
-          </p>
-        </div>
+                    <button
+                      onClick={() => setIsLogin(false)}
+                      className="w-fit mt-6 px-6 py-2 border-2 border-white rounded-xl text-white hover:bg-white hover:text-gray-900 transition-all duration-200"
+                    >
+                      New Here? Register
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-4">
+                      <h2 className="text-4xl font-bold leading-tight">
+                        Join Our
+                        <br />
+                        <span className="text-blue-300">Medical Network</span> 🌐
+                      </h2>
+                      <p className="text-gray-200 leading-relaxed text-lg">
+                        Be part of the future of healthcare. Connect with a global
+                        network of medical professionals and access cutting-edge tools.
+                      </p>
+                    </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <span className="text-green-400">✓</span>
-            <span>AI-driven patient analytics</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-green-400">✓</span>
-            <span>Blockchain-secured records</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-green-400">✓</span>
-            <span>Global collaboration platform</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-green-400">✓</span>
-            <span>24/7 professional support</span>
-          </div>
-        </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-green-400">✓</span>
+                        <span>AI-driven patient analytics</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-green-400">✓</span>
+                        <span>Blockchain-secured records</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-green-400">✓</span>
+                        <span>Global collaboration platform</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-green-400">✓</span>
+                        <span>24/7 professional support</span>
+                      </div>
+                    </div>
 
-        <button
-          onClick={toggleMode}
-          className="w-fit mt-6 px-6 py-2 border-2 border-white rounded-xl text-white hover:bg-white hover:text-gray-900 transition-all duration-200"
-        >
-          Already Registered? Sign In
-        </button>
-      </>
-    )}
-  </div>
+                    <button
+                      onClick={() => setIsLogin(true)}
+                      className="w-fit mt-6 px-6 py-2 border-2 border-white rounded-xl text-white hover:bg-white hover:text-gray-900 transition-all duration-200"
+                    >
+                      Already Registered? Sign In
+                    </button>
+                  </>
+                )}
+              </div>
 
-  {/* Floating elements */}
-  <div className="absolute top-20 right-20 w-16 h-16 rounded-full bg-blue-500/20 animate-pulse animate-duration-[4000ms]"></div>
-  <div className="absolute bottom-32 right-32 w-12 h-12 rounded-full bg-cyan-500/20 animate-float animate-duration-[15000ms]"></div>
-</div>
-
+              {/* Floating elements */}
+              <div className="absolute top-20 right-20 w-16 h-16 rounded-full bg-blue-500/20 animate-pulse animate-duration-[4000ms]"></div>
+              <div className="absolute bottom-32 right-32 w-12 h-12 rounded-full bg-cyan-500/20 animate-float animate-duration-[15000ms]"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -395,4 +478,4 @@ const DoctorAuthForm = () => {
   );
 };
 
-export default DoctorAuthForm;
+export default DoctorAuth;
