@@ -1,68 +1,75 @@
+// src/api/doctorApi.js
 import axios from 'axios';
 
-// Create axios instance with base configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
+
+console.log('API Base URL:', API_BASE_URL);
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// Add token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('doctorToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (config.method === 'get') config.params = { ...config.params, _t: Date.now() };
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Handle response errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
       localStorage.removeItem('doctorToken');
-      window.location.href = '/doctor/login';
+      window.location.replace('/doctor/login');
     }
     return Promise.reject(error);
   }
 );
 
-// API functions
+// --- API Functions ---
+
 export const getDoctorProfile = async () => {
   try {
-    const response = await api.get('/doctor/profile');
-    return response.data;
+    const { data } = await api.get('/doctors/profile');
+    return { success: true, data, message: 'Profile loaded successfully' };
   } catch (error) {
-    console.error('Error fetching doctor profile:', error);
-    throw error;
+    return { success: false, message: error.response?.data?.message || error.message, status: error.response?.status };
   }
 };
 
+// Update doctor profile
 export const updateDoctorProfile = async (profileData) => {
   try {
-    const response = await api.put('/doctor/profile', profileData);
-    return response.data;
+    const { data } = await api.put('/doctors/profile', profileData);
+    return { success: true, data, message: 'Profile updated successfully' };
   } catch (error) {
-    console.error('Error updating doctor profile:', error);
-    throw error;
+    return { success: false, message: error.response?.data?.message || error.message, status: error.response?.status };
   }
 };
 
-export const changeDoctorPassword = async (passwordData) => {
+// Change doctor password
+export const changeDoctorPassword = async (oldPassword, newPassword) => {
   try {
-    const response = await api.post('/doctor/change-password', passwordData);
-    return response.data;
+    const { data } = await api.put('/doctors/change-password', { oldPassword, newPassword });
+    return { success: true, data, message: 'Password changed successfully' };
   } catch (error) {
-    console.error('Error changing password:', error);
-    throw error;
+    return { success: false, message: error.response?.data?.message || error.message, status: error.response?.status };
+  }
+};
+
+export const testConnection = async () => {
+  try {
+    const { data } = await api.get('/health');
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, message: 'Cannot connect to server', status: error.response?.status };
   }
 };
 
