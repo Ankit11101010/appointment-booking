@@ -1,94 +1,87 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import doctorRoutes from './routes/auth.js';
 
-// Import routes and utilities
-const doctorRoutes = require('./routes/doctors');
-const authRoutes = require('./routes/auth');
-const { errorHandler, notFound } = require('./utils/errorHandler');
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
-// Database connection with improved options
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/doctor-app', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected successfully'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
-
-// Enhanced CORS configuration
-const allowedOrigins = [
-  'http://localhost:5173', // Vite dev server
-  'http://127.0.0.1:5173', // Vite alternative
-  'http://localhost:3000', // Create React App
-  'http://127.0.0.1:3000', // Create React App alternative
-  process.env.CLIENT_URL // From environment variable
-].filter(Boolean); // Remove any undefined values
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman, or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('🚫 Blocked by CORS:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-};
-
-app.use(cors(corsOptions));
-
-// Handle preflight requests explicitly
-app.options('*', cors(corsOptions));
+// Connect to database
+connectDB();
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 
-// Rate limiting (100 requests per 15 min per IP)
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  handler: (req, res) => {
-    res.status(429).json({ 
-      success: false, 
-      message: 'Too many requests, please try again later.' 
-    });
-  }
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
 });
-app.use('/api/', limiter);
 
 // Routes
 app.use('/api/doctors', doctorRoutes);
-app.use('/api/auth', authRoutes);
 
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Server is running successfully',
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Doctor Authentication API Server',
+    version: '1.0.0',
     timestamp: new Date().toISOString(),
-    allowedOrigins: allowedOrigins
+    endpoints: {
+      auth: '/api/doctors',
+      health: '/api/health'
+    }
   });
 });
 
-// Handle undefined routes
-app.use(notFound);
-
-// Error handler middleware
-app.use(errorHandler);
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  console.log(`🌐 Allowed origins: ${allowedOrigins.join(', ')}`);
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`
+  });
 });
+
+// Global error handler
+app.use((error, req, res, next) => {
+  console.error('Global error handler:', error);
+  
+  if (error.type === 'entity.parse.failed') {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid JSON payload'
+    });
+  }
+
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { error: error.message })
+  });
+});
+
+const PORT = process.env.PORT || 5173;
+
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});
+
+export default app;
