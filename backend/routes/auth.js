@@ -1,6 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import Doctor from '../models/Doctor.js';
+import Doctor from '../models/DoctorAuth.js';
 
 const router = express.Router();
 
