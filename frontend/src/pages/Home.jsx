@@ -19,7 +19,6 @@ const Dashboard = () => {
     const checkScreenSize = () => {
       const largeScreen = window.innerWidth >= 1280;
       setIsLargeScreen(largeScreen);
-      // Auto-expand sidebar on large screens
       if (largeScreen) {
         setExpanded(true);
       }
@@ -28,7 +27,6 @@ const Dashboard = () => {
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     
-    // Close sidebar when clicking outside on mobile
     const handleClickOutside = (event) => {
       if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
         setSidebarOpen(false);
@@ -53,7 +51,6 @@ const Dashboard = () => {
   ];
 
   const renderContent = () => {
-    
     if (activeSection === 'profile') {
       return <Profile />;
     }
@@ -74,11 +71,22 @@ const Dashboard = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:5000/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      window.location.href = '/'; // Redirect to landing page
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900">
       {/* Mobile header with logo and hamburger */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-gray-900/95 backdrop-blur-xl border-b border-gray-700/30">
-        {/* Logo on the left */}
         <div className="flex items-center">
           <div className="text-teal-400 font-bold text-xl flex items-center">
             <div className="bg-gradient-to-r from-teal-400 to-teal-500 text-white p-2 rounded-lg mr-3 shadow-lg">
@@ -90,7 +98,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Hamburger menu on the right */}
         <button 
           onClick={() => setSidebarOpen(true)}
           className="p-3 rounded-xl bg-gray-800/60 backdrop-blur-md border border-gray-700/30 text-white hover:bg-gray-700/60 transition-all duration-300 shadow-lg"
@@ -108,11 +115,8 @@ const Dashboard = () => {
         onMouseEnter={() => !isLargeScreen && setExpanded(true)}
         onMouseLeave={() => !isLargeScreen && setExpanded(false)}
       >
-        
         <div className="flex flex-col h-full py-6">
-          {/* Logo and close button - Only visible on large screens */}
           <div className="hidden lg:flex items-center justify-between px-4 mb-8">
-            {/* Logo */}
             <div className="flex items-center flex-shrink-0">
               <div className="text-teal-400 font-bold text-xl lg:text-2xl flex items-center">
                 <div className="bg-gradient-to-r from-teal-400 to-teal-500 text-white p-2 rounded-lg mr-3 shadow-lg">
@@ -127,7 +131,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Close button for mobile - positioned at top right of sidebar */}
           <div className="lg:hidden flex justify-between items-center px-4 mb-6">
             <div className="text-teal-400 font-bold text-xl flex items-center">
               <div className="bg-gradient-to-r from-teal-400 to-teal-500 text-white p-2 rounded-lg mr-3 shadow-lg">
@@ -145,14 +148,13 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 flex flex-col space-y-2 px-4">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => {
                   setActiveSection(item.id);
-                  setSidebarOpen(false); // Close sidebar on mobile after selection
+                  setSidebarOpen(false);
                 }}
                 className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-300 group ${
                   activeSection === item.id
@@ -172,7 +174,6 @@ const Dashboard = () => {
                   </span>
                 )}
                 
-                {/* Tooltip for collapsed state */}
                 {!(expanded || isLargeScreen || sidebarOpen) && (
                   <span className="absolute left-16 bg-gray-900 text-white text-sm font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50 border border-gray-700">
                     {item.label}
@@ -182,11 +183,9 @@ const Dashboard = () => {
             ))}
           </nav>
 
-          {/* Settings and Logout buttons */}
           <div className="pt-4 border-t border-gray-700/30 mx-4 space-y-2">
-           
-            
             <button
+              onClick={handleLogout}
               className="flex items-center space-x-3 p-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 transition-all duration-300 group w-full"
             >
               <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-300" />
@@ -195,7 +194,6 @@ const Dashboard = () => {
                 <span className="text-red-400 group-hover:text-red-300 font-medium">Logout</span>
               )}
               
-              {/* Tooltip for collapsed state */}
               {!(expanded || isLargeScreen || sidebarOpen) && (
                 <span className="absolute left-16 bg-gray-900 text-red-400 text-sm font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-50 border border-gray-700">
                   Logout
@@ -206,7 +204,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Close sidebar overlay for mobile */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 lg:hidden" 
@@ -214,7 +211,6 @@ const Dashboard = () => {
         ></div>
       )}
 
-      {/* Main content */}
       <div className={`min-h-screen flex items-center justify-center transition-all duration-300 ${
         isLargeScreen ? 'lg:ml-64' : expanded ? 'lg:ml-64' : 'lg:ml-20'
       } p-0 pt-20 lg:pt-0 lg:p-0`}>
