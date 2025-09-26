@@ -12,10 +12,9 @@ import {
   FaHeartbeat,
   FaEye,
   FaEyeSlash,
-  FaHospital,
   FaCheckCircle,
   FaTimesCircle,
-  FaArrowLeft
+  FaArrowLeft,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -36,7 +35,6 @@ const DoctorAuth = () => {
 
   useEffect(() => {
     if (!isLogin && formData.password) {
-      // Calculate password strength
       let strength = 0;
       if (formData.password.length >= 8) strength += 1;
       if (/[A-Z]/.test(formData.password)) strength += 1;
@@ -54,8 +52,7 @@ const DoctorAuth = () => {
     e.preventDefault();
     setMessage("");
     setIsLoading(true);
-    
-    // Validate passwords match for signup
+
     if (!isLogin && formData.password !== formData.confirmPassword) {
       setMessage("Passwords do not match");
       setIsLoading(false);
@@ -64,15 +61,12 @@ const DoctorAuth = () => {
 
     try {
       let result;
-      
       if (isLogin) {
-        // Use the API module for login
         result = await doctorAuthAPI.login({
           email: formData.email,
-          password: formData.password
+          password: formData.password,
         });
       } else {
-        // Use the API module for registration
         result = await doctorAuthAPI.register({
           name: formData.name,
           email: formData.email,
@@ -83,9 +77,7 @@ const DoctorAuth = () => {
       }
 
       if (result.success) {
-        setMessage(result.message || (isLogin ? "Login successful ✅" : "Registration successful ✅"));
-        
-        // Redirect after successful authentication
+        setMessage(result.message);
         setTimeout(() => {
           window.location.href = "/dash";
         }, 1500);
@@ -100,14 +92,14 @@ const DoctorAuth = () => {
   };
 
   const specializations = [
-    { value: "cardiologist", label: "Cardiologist", icon: <FaHeartbeat className="mr-2" /> },
-    { value: "neurologist", label: "Neurologist", icon: <FaBrain className="mr-2" /> },
-    { value: "pediatrician", label: "Pediatrician", icon: <FaUser className="mr-2" /> },
-    { value: "dermatologist", label: "Dermatologist", icon: <FaCheckCircle className="mr-2" /> },
-    { value: "general", label: "General Physician", icon: <FaUserMd className="mr-2" /> },
-    { value: "surgeon", label: "Surgeon", icon: <FaClinicMedical className="mr-2" /> },
-    { value: "psychiatrist", label: "Psychiatrist", icon: <FaBrain className="mr-2" /> },
-    { value: "radiologist", label: "Radiologist", icon: <FaHospital className="mr-2" /> },
+    { value: "cardiologist", label: "Cardiologist" },
+    { value: "neurologist", label: "Neurologist" },
+    { value: "pediatrician", label: "Pediatrician" },
+    { value: "dermatologist", label: "Dermatologist" },
+    { value: "general", label: "General Physician" },
+    { value: "surgeon", label: "Surgeon" },
+    { value: "psychiatrist", label: "Psychiatrist" },
+    { value: "radiologist", label: "Radiologist" },
   ];
 
   const getPasswordStrengthColor = () => {
@@ -120,19 +112,18 @@ const DoctorAuth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 relative overflow-hidden">
-      {/* Animated background elements */}
       <div className="absolute inset-0 opacity-30">
-        <motion.div 
+        <motion.div
           className="absolute top-10 left-10 w-32 h-32 rounded-full bg-blue-500/10"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 8, repeat: Infinity }}
         ></motion.div>
-        <motion.div 
+        <motion.div
           className="absolute top-1/3 right-20 w-48 h-48 rounded-full bg-cyan-500/10"
           animate={{ y: [0, -30, 0], rotate: [0, 10, 0] }}
           transition={{ duration: 15, repeat: Infinity }}
         ></motion.div>
-        <motion.div 
+        <motion.div
           className="absolute bottom-20 left-1/4 w-24 h-24 rounded-full bg-emerald-500/10"
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 5, repeat: Infinity }}
@@ -140,19 +131,17 @@ const DoctorAuth = () => {
       </div>
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4 lg:p-8">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-7xl bg-gray-800/90 backdrop-blur-xl rounded-3xl border border-gray-700 shadow-2xl overflow-hidden min-h-[600px] lg:min-h-[700px]"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
-            {/* Form Section */}
             <div className="p-6 sm:p-8 lg:p-12 flex items-center justify-center h-full">
               <div className="w-full max-w-md space-y-8">
-                {/* Header */}
                 <div className="text-center space-y-2">
-                  <motion.div 
+                  <motion.div
                     initial={{ scale: 0.9 }}
                     animate={{ scale: 1 }}
                     transition={{ duration: 0.3 }}
@@ -168,22 +157,18 @@ const DoctorAuth = () => {
                     </h1>
                   </motion.div>
                   <p className="text-gray-400 text-sm">
-                    {isLogin
-                      ? "Access your medical dashboard"
-                      : "Join our healthcare network"}
+                    {isLogin ? "Access your medical dashboard" : "Join our healthcare network"}
                   </p>
                 </div>
 
                 <AnimatePresence>
                   {message && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       className={`p-3 rounded-lg text-center text-sm flex items-center justify-center ${
-                        message.includes("✅") 
-                          ? "bg-green-900/30 text-green-300" 
-                          : "bg-red-900/30 text-red-300"
+                        message.includes("✅") ? "bg-green-900/30 text-green-300" : "bg-red-900/30 text-red-300"
                       }`}
                     >
                       {message.includes("✅") ? (
@@ -196,16 +181,15 @@ const DoctorAuth = () => {
                   )}
                 </AnimatePresence>
 
-                {/* Login Form */}
                 <AnimatePresence mode="wait">
                   {isLogin ? (
-                    <motion.form 
+                    <motion.form
                       key="login-form"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ duration: 0.3 }}
-                      onSubmit={handleSubmit} 
+                      onSubmit={handleSubmit}
                       className="space-y-6"
                     >
                       <div className="space-y-4">
@@ -247,22 +231,6 @@ const DoctorAuth = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-sm">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
-                          />
-                          <span className="text-gray-400">Remember me</span>
-                        </label>
-                        <button
-                          type="button"
-                          className="text-blue-400 hover:text-blue-300 transition-colors"
-                        >
-                          Forgot password?
-                        </button>
-                      </div>
-
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -291,13 +259,13 @@ const DoctorAuth = () => {
                       </div>
                     </motion.form>
                   ) : (
-                    <motion.form 
+                    <motion.form
                       key="signup-form"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ duration: 0.3 }}
-                      onSubmit={handleSubmit} 
+                      onSubmit={handleSubmit}
                       className="space-y-6"
                     >
                       <div className="space-y-4">
@@ -332,7 +300,7 @@ const DoctorAuth = () => {
                         </div>
 
                         <div className="relative">
-                          <select 
+                          <select
                             name="specialization"
                             value={formData.specialization}
                             onChange={handleChange}
@@ -350,18 +318,8 @@ const DoctorAuth = () => {
                             <FaUserMd />
                           </div>
                           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 9l-7 7-7-7"
-                              ></path>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                           </div>
                         </div>
@@ -394,7 +352,7 @@ const DoctorAuth = () => {
                               <span className="text-xs text-gray-400">Password Strength</span>
                             </div>
                             <div className="w-full bg-gray-700 rounded-full h-1.5">
-                              <div 
+                              <div
                                 className={`h-1.5 rounded-full ${getPasswordStrengthColor()}`}
                                 style={{ width: `${passwordStrength * 25}%` }}
                               ></div>
@@ -435,24 +393,8 @@ const DoctorAuth = () => {
                           required
                           className="mt-1 rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
                         />
-                        <label
-                          htmlFor="terms"
-                          className="text-gray-400 text-sm leading-relaxed"
-                        >
-                          I agree to the{" "}
-                          <button
-                            type="button"
-                            className="text-blue-400 hover:text-blue-300 transition-colors"
-                          >
-                            Terms of Service
-                          </button>{" "}
-                          and{" "}
-                          <button
-                            type="button"
-                            className="text-blue-400 hover:text-blue-300 transition-colors"
-                          >
-                            Privacy Policy
-                          </button>
+                        <label htmlFor="terms" className="text-gray-400 text-sm leading-relaxed">
+                          I agree to the Terms of Service and Privacy Policy
                         </label>
                       </div>
 
@@ -488,7 +430,6 @@ const DoctorAuth = () => {
               </div>
             </div>
 
-            {/* Welcome Section */}
             <div className="hidden lg:flex relative bg-gradient-to-br from-blue-900/70 via-cyan-900/50 to-gray-900 p-12 h-full min-h-[calc(100vh-100px)]">
               <div className="relative z-10 flex flex-col justify-center text-white space-y-6 w-full">
                 <AnimatePresence mode="wait">
@@ -508,9 +449,8 @@ const DoctorAuth = () => {
                           <span className="text-blue-300">Doctor</span> 👨‍⚕️
                         </h2>
                         <p className="text-gray-200 leading-relaxed text-lg">
-                          Access your AI-powered medical workspace. Manage patients,
-                          collaborate with colleagues, and stay at the forefront of
-                          healthcare innovation.
+                          Access your AI-powered medical workspace. Manage patients, collaborate with colleagues, and stay at
+                          the forefront of healthcare innovation.
                         </p>
                       </div>
 
@@ -555,8 +495,8 @@ const DoctorAuth = () => {
                           <span className="text-blue-300">Medical Network</span> 🌐
                         </h2>
                         <p className="text-gray-200 leading-relaxed text-lg">
-                          Be part of the future of healthcare. Connect with a global
-                          network of medical professionals and access cutting-edge tools.
+                          Be part of the future of healthcare. Connect with a global network of medical professionals and
+                          access cutting-edge tools.
                         </p>
                       </div>
 
@@ -593,13 +533,12 @@ const DoctorAuth = () => {
                 </AnimatePresence>
               </div>
 
-              {/* Floating elements */}
-              <motion.div 
+              <motion.div
                 className="absolute top-20 right-20 w-16 h-16 rounded-full bg-blue-500/20"
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 8, repeat: Infinity }}
               ></motion.div>
-              <motion.div 
+              <motion.div
                 className="absolute bottom-32 right-32 w-12 h-12 rounded-full bg-cyan-500/20"
                 animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
                 transition={{ duration: 15, repeat: Infinity }}
