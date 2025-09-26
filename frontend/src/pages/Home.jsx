@@ -72,32 +72,6 @@ const Dashboard = () => {
     if (activeSection === 'privacy'){
       return <Privacy />;
     }
-    return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <h1 className="text-3xl md:text-4xl font-bold text-white text-center capitalize mb-4 md:mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-          {activeSection}
-        </h1>
-        <p className="text-gray-300 text-center max-w-md text-base md:text-lg px-4 md:px-0">
-          This is the {activeSection} section content. Add your specific content here.
-        </p>
-        <div className="mt-6 md:mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 px-4 md:px-0">
-          <div className="bg-gray-800/60 backdrop-blur-md border border-gray-700/30 rounded-xl md:rounded-2xl p-4 md:p-6 w-full max-w-xs md:max-w-none md:w-64 hover:border-blue-500/30 transition-all duration-300">
-            <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 rounded-lg md:rounded-xl mb-3 md:mb-4">
-              <Activity className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
-            </div>
-            <h3 className="text-white font-semibold text-base md:text-lg mb-1 md:mb-2">Quick Stats</h3>
-            <p className="text-gray-400 text-xs md:text-sm">View your important metrics and analytics</p>
-          </div>
-          <div className="bg-gray-800/60 backdrop-blur-md border border-gray-700/30 rounded-xl md:rounded-2xl p-4 md:p-6 w-full max-w-xs md:max-w-none md:w-64 hover:border-purple-500/30 transition-all duration-300">
-            <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-purple-500/20 rounded-lg md:rounded-xl mb-3 md:mb-4">
-              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
-            </div>
-            <h3 className="text-white font-semibold text-base md:text-lg mb-1 md:mb-2">Recent Activity</h3>
-            <p className="text-gray-400 text-xs md:text-sm">Check your latest actions and updates</p>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -243,7 +217,7 @@ const Dashboard = () => {
       {/* Main content */}
       <div className={`min-h-screen flex items-center justify-center transition-all duration-300 ${
         isLargeScreen ? 'lg:ml-64' : expanded ? 'lg:ml-64' : 'lg:ml-20'
-      } p-4 pt-20 lg:pt-6 lg:p-6`}>
+      } p-0 pt-20 lg:pt-0 lg:p-0`}>
         {renderContent()}
       </div>
     </div>

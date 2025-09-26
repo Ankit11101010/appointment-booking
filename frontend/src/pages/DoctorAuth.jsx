@@ -63,30 +63,34 @@ const DoctorAuth = () => {
     }
 
     try {
+      let result;
+      
       if (isLogin) {
         // Use the API module for login
-        const data = await doctorAuthAPI.login(formData.email, formData.password);
-        localStorage.setItem("doctorToken", data.token);
-        setMessage("Login successful ✅");
-        // Redirect after successful login
-        setTimeout(() => {
-          window.location.href = "/dash";
-        }, 1500);
+        result = await doctorAuthAPI.login({
+          email: formData.email,
+          password: formData.password
+        });
       } else {
         // Use the API module for registration
-        const data = await doctorAuthAPI.register({
+        result = await doctorAuthAPI.register({
           name: formData.name,
           email: formData.email,
           password: formData.password,
           role: "doctor",
           specialization: formData.specialization,
         });
-        localStorage.setItem("doctorToken", data.token);
-        setMessage("Signup successful ✅");
-        // Redirect after successful signup
+      }
+
+      if (result.success) {
+        setMessage(result.message || (isLogin ? "Login successful ✅" : "Registration successful ✅"));
+        
+        // Redirect after successful authentication
         setTimeout(() => {
           window.location.href = "/dash";
         }, 1500);
+      } else {
+        setMessage(result.message || "Authentication failed");
       }
     } catch (error) {
       setMessage(error.message || "Error occurred");

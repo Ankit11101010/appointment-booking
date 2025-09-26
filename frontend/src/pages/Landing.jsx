@@ -400,11 +400,11 @@ export default function LandingPage() {
                 <FaCalendarAlt className="mr-3" />
                 Book Appointment
               </button>
-              <a href="#how-it-works">
+              
               <button className="border-2 border-teal-400 text-teal-400 hover:bg-gray-800 px-8 py-4 rounded-xl font-medium text-lg transition-all">
-                How It Works →
+               <a href="#how-it-works"> How It Works →</a>
               </button>
-              </a>
+              
             </div>
             <div className="flex flex-wrap gap-6 pt-6 justify-center md:justify-start">
               {['Smart Doctor Match', 'Instant Booking', 'Video Consult', 'E-Prescriptions'].map((feature, i) => (
